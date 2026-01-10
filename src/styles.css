@@ -1,0 +1,162 @@
+
+
+
+/* ===== ROOT SCROLL FIX ===== */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== APP BACKGROUND ===== */
+body {
+  background: #f4f6f9;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+}
+
+/* ===== MAIN PAGE CONTAINER ===== */
+.container-page {
+  max-width: 420px;
+  margin: auto;
+  padding: 16px;
+
+  /* 🔥 SCROLL FIX */
+  min-height: calc(100vh - 56px);
+}
+
+/* ===== TOP BAR ===== */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.top-bar h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ===== CARDS ===== */
+.card-ui {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+}
+
+/* ===== ICON BUTTON ===== */
+.icon-btn {
+  border: none;
+  background: none;
+  font-size: 18px;
+  color: #555;
+}
+
+/* ===== UI POLISH ===== */
+.alert {
+  border-radius: 10px;
+}
+
+.btn {
+  border-radius: 10px;
+}
+
+
+.container-page {
+  padding: 14px;
+}
+
+.app-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+}
+
+.section-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #444;
+}
+
+.action-btn {
+  height: 48px;
+  font-weight: 500;
+  border-radius: 12px;
+}
+
+.soft-input {
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+}
+
+.soft-input:focus {
+  box-shadow: 0 0 0 2px rgba(13,110,253,0.15);
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+}
+
+.list-item {
+  padding: 10px 4px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.empty-state {
+  text-align: center;
+  margin-top: 60px;
+  color: #888;
+}
+
+.empty-state i {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.magic-code-box {
+  text-align: center;
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 14px;
+}
+
+.magic-code {
+  font-size: 28px;
+  font-weight: 700;
+  color: #198754;
+  letter-spacing: 4px;
+}
+
+
+
+
+/* ===============================
+   MOBILE WIDTH NAVBAR FIX
+================================ */
+.navbar {
+  max-width: 420px;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+  border-radius: 0 0 16px 16px;
+}
+
+/* Align page content with navbar */
+.page-wrapper {
+  padding-top: 56px;
+  max-width: 420px;
+  margin: auto;
+}
+
+
+
+
+.drawer-right {
+  transition: transform 0.25s ease;
+}

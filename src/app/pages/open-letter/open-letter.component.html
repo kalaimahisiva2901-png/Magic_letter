@@ -1,0 +1,112 @@
+<div class="container-page">
+  <div class="app-card">
+
+    <!-- HEADER -->
+   <div class="d-flex align-items-center mb-3 open-header">
+  <button class="icon-btn me-2" (click)="goHome()">
+    <i class="fa-solid fa-arrow-left"></i>
+  </button>
+
+  <div class="d-flex align-items-center gap-2 header-title">
+    <i class="fa-solid fa-unlock"></i>
+    <span>Open Letter</span>
+  </div>
+</div>
+
+    <!-- INPUT -->
+    <input
+      class="form-control soft-input mb-3"
+      placeholder="Enter magic code"
+      [(ngModel)]="secretCode">
+
+    <button
+      type="button"
+      class="btn btn-success w-100 action-btn mb-3"
+      (click)="open()">
+      <i class="fa-solid fa-magnifying-glass me-2"></i>
+      Check Letter
+    </button>
+
+    <!-- ERROR -->
+    @if (message) {
+      <div class="alert alert-danger small">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>
+        {{ message }}
+      </div>
+    }
+
+    <!-- LOCKED -->
+    @if (status === 'locked') {
+
+      @if (!isFinalSeconds) {
+        <div class="alert alert-warning">
+          <div class="d-flex justify-content-between">
+            <span>Unlocks in</span>
+            <strong>{{ remainingText }}</strong>
+          </div>
+
+          <div class="progress mt-2">
+            <div
+              class="progress-bar bg-warning"
+              [style.width.%]="progress">
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (isFinalSeconds) {
+        <div class="final-countdown">
+          <div class="pulse-ring"></div>
+          <i class="fa-solid fa-hourglass-half countdown-icon"></i>
+          <div class="big-seconds">
+            {{ finalSeconds }}
+          </div>
+          <div class="small text-muted">
+            seconds remaining
+          </div>
+        </div>
+      }
+
+    }
+
+    <!-- READY -->
+   @if (status === 'ready') {
+  <div class="ready-hero">
+    <!-- glow pulse -->
+    <div class="ready-glow"></div>
+
+    <!-- animated icon -->
+    <div class="ready-icon">
+      <i class="fa-solid fa-lock-open"></i>
+    </div>
+
+    <!-- text -->
+    <p class="ready-title">
+      Letter is ready
+    </p>
+
+    <p class="ready-sub">
+      Tap to reveal your message
+    </p>
+
+    <!-- CTA -->
+    <button
+      class="btn ready-action"
+      (click)="unlock()">
+      <i class="fa-solid fa-envelope-open me-2"></i>
+      Open Letter
+    </button>
+  </div>
+}
+
+
+    <!-- OPENED -->
+    @if (status === 'opened') {
+      <div class="alert alert-success mt-3">
+        <i class="fa-solid fa-envelope-open-text me-2"></i>
+        {{ letterText }}
+      </div>
+    }
+
+  </div>
+</div>

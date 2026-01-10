@@ -1,0 +1,80 @@
+<div class="container-page lock-screen">
+
+  <!-- HEADER -->
+  <div class="open-header">
+    <button class="icon-btn" (click)="goHome()">
+      <i class="fa-solid fa-arrow-left"></i>
+    </button>
+
+    <div class="header-title">
+      <i class="fa-solid fa-lock"></i>
+      <span>Lock Letter</span>
+    </div>
+  </div>
+
+  <!-- CARD -->
+  <div class="app-card">
+
+    <p class="section-title mb-3">
+      Write a message for the future
+    </p>
+
+    <!-- ERROR -->
+    @if (message) {
+      <div class="alert alert-danger">
+        {{ message }}
+      </div>
+    }
+
+    <!-- WRITE MODE -->
+    @if (!showCode) {
+
+      <textarea
+        class="form-control soft-input letter-area mb-3"
+        placeholder="Write your secret letter..."
+        [(ngModel)]="text">
+      </textarea>
+
+      <div class="row g-2 mb-4">
+        <div class="col-6">
+          <input type="date" class="form-control soft-input" [(ngModel)]="date">
+        </div>
+        <div class="col-6">
+          <input type="time" class="form-control soft-input" [(ngModel)]="time">
+        </div>
+      </div>
+
+      <button
+        class="btn btn-primary w-100 action-btn"
+        [disabled]="isSaving"
+        (click)="lock()">
+        <i class="fa-solid fa-key me-2"></i>
+        Lock Letter
+      </button>
+    }
+
+    <!-- 🔒 AFTER LOCK -->
+    @if (showCode) {
+
+      <div class="letter-preview">
+        <div class="preview-header">
+          <i class="fa-solid fa-envelope-open-text"></i>
+          <span>Letter Locked</span>
+        </div>
+
+        <p class="letter-text">
+          {{ previewText }}
+        </p>
+      </div>
+
+      <div class="magic-code-box">
+        <span class="code-label">Your Magic Code</span>
+        <div class="magic-code">{{ code }}</div>
+        <span class="code-hint">
+          Auto hiding in {{ countdown }}s
+        </span>
+      </div>
+    }
+
+  </div>
+</div>

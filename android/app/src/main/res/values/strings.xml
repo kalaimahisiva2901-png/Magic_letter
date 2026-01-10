@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Magic Letter</string>
+    <string name="title_activity_main">Magic Letter</string>
+    <string name="package_name">com.mahesh.magicletter</string>
+    <string name="custom_url_scheme">com.mahesh.magicletter</string>
+</resources>

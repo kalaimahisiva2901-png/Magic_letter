@@ -1,0 +1,13 @@
+.auth-box {
+  max-width: 400px;
+}
+
+button {
+  height: 48px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+i.fa-google {
+  font-size: 18px;
+}

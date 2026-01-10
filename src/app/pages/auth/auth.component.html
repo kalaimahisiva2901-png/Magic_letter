@@ -1,0 +1,21 @@
+<div class="container mt-5 text-center auth-box">
+
+  <h4 class="mb-4 fw-semibold">
+    Welcome to <span class="text-primary">Magic Letter</span>
+  </h4>
+
+  <button
+    class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2"
+    [disabled]="isSigningIn"
+    (click)="loginWithGoogle()">
+
+    <i class="fa-brands fa-google"></i>
+    {{ isSigningIn ? 'Signing you in…' : 'Continue with Google' }}
+
+  </button>
+
+  <p class="text-muted mt-3" style="font-size: 14px;">
+    Secure sign-in powered by Google
+  </p>
+
+</div>

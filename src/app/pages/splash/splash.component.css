@@ -1,0 +1,43 @@
+/* ===============================
+   📱 DEFAULT = PHONE (FULL SCREEN)
+   =============================== */
+
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+.splash-container {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0d6efd, #6610f2);
+}
+
+.splash-card {
+  text-align: center;
+  color: white;
+}
+
+.splash-icon {
+  font-size: 48px;
+}
+
+
+/* ===============================
+   💻 TABLET / DESKTOP OVERRIDE
+   =============================== */
+
+@media (min-width: 769px) {
+  :host {
+    position: static;
+  }
+
+  .splash-container {
+    height: 100%;
+    width: 100%;
+  }
+}

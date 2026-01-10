@@ -1,0 +1,97 @@
+<!-- 🔝 NAVBAR -->
+<nav class="home-navbar">
+  <div class="nav-left">
+    <i class="fa-solid fa-lock me-2"></i>
+    Magic Letter
+  </div>
+
+  <button class="icon-btn" (click)="openSettings()">
+    <i class="fa-solid fa-gear"></i>
+  </button>
+</nav>
+
+<!-- 🔽 PAGE CONTENT -->
+<div class="container-page home-screen">
+
+  <!-- ACTIONS -->
+  <div class="app-card mb-4 home-actions">
+    <button
+      class="btn btn-primary w-100 action-btn mb-3"
+      (click)="goToLock()">
+      <i class="fa-solid fa-lock me-2"></i>
+      Lock a Letter
+    </button>
+
+    <button
+      class="btn btn-outline-success w-100 action-btn"
+      (click)="goToOpen()">
+      <i class="fa-solid fa-unlock me-2"></i>
+      Open a Letter
+    </button>
+  </div>
+
+  <!-- LETTER LIST -->
+  @if (letters.length > 0) {
+    <div class="app-card letter-history">
+
+      <div class="section-title mb-3">
+        <i class="fa-solid fa-envelope-open-text me-2"></i>
+        Your Letters
+      </div>
+
+      @for (l of letters; track $index) {
+        <div class="list-item d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <span
+              class="status-dot"
+              [class.locked]="isLocked(l)"
+              [class.opened]="!isLocked(l)">
+            </span>
+
+            <span class="fw-medium">
+              {{ isLocked(l) ? 'Locked' : 'Opened' }}
+            </span>
+          </div>
+
+          <small class="time-text">
+            <i class="fa-regular fa-clock me-1"></i>
+            {{ getTime(l.unlockAt) }}
+          </small>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- EMPTY -->
+  @if (letters.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="fa-solid fa-envelope-circle-check"></i>
+      </div>
+      <p>No letters yet</p>
+      <small>Create one to get started</small>
+    </div>
+  }
+</div>
+
+<!-- ⚙️ SETTINGS DRAWER -->
+@if (showSettings) {
+  <div class="drawer-backdrop" (click)="closeSettings()"></div>
+
+  <div class="drawer-right" (click)="$event.stopPropagation()">
+    <div class="drawer-header">
+      <img
+        class="avatar"
+        src="https://ui-avatars.com/api/?name={{userName}}&background=6c7cff&color=fff" />
+      <div class="fw-semibold mt-2">{{ userName }}</div>
+      <small class="text-muted">{{ userEmail }}</small>
+    </div>
+      <div class="drawer-body"></div>
+    <div class="drawer-footer">
+      <button class="btn btn-outline-danger w-100" (click)="logout()">
+        <i class="fa-solid fa-right-from-bracket me-2"></i>
+        Logout
+      </button>
+    </div>
+  </div>
+}
