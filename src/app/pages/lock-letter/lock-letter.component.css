@@ -1,114 +1,174 @@
-/* Screen background */
-.lock-screen {
-  background: linear-gradient(180deg, #f8f9fb, #ffffff);
+/* ✅ GLOBAL SCROLL CONFIG (Matches Home) */
+:root {
+  --primary: #6366f1;
+  --secondary: #10b981;
+  --bg-light: #f4f6f9;
 }
 
-/* Header */
-.open-header {
+html, body {
+  height: auto;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto; /* Enable page scroll */
+  background: var(--bg-light);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ✅ NAVBAR - CENTERED 420px */
+.home-navbar {
+  height: 70px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  max-width: 420px;
+  margin: 0 auto;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-radius: 0 0 16px 16px;
+  box-sizing: border-box;
 }
 
-.header-title {
+.brand-text { color: #000; font-weight: 850; letter-spacing: -0.8px; font-size: 1.1rem; }
+.logo-icon.minimalist {
+  background: #000; color: #fff; width: 32px; height: 32px;
+  border-radius: 8px; display: grid; place-items: center; font-size: 0.85rem;
+}
+
+/* ✅ CONTAINER - NATURAL GROWTH */
+.container-page {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 90px 16px 50px;
+  min-height: 100vh;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
-/* Card */
+/* 👋 GREETING SECTION */
+.welcome-section h1 { font-size: 1.8rem; font-weight: 900; color: #000; letter-spacing: -1px; margin-bottom: 4px; }
+.welcome-section p { color: #64748b; font-size: 0.95rem; margin-bottom: 24px; line-height: 1.4; }
+
+/* 🃏 THE APP CARD */
 .app-card {
-  border-radius: 22px;
-  padding: 20px;
-  box-shadow: 0 14px 35px rgba(0,0,0,0.08);
+  background: #fff;
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.04);
 }
 
-/* Section text */
 .section-title {
-  font-size: 14px;
-  color: #555;
-  font-weight: 500;
+  font-weight: 800;
+  font-size: 0.75rem;
+  color: #64748b;
+  letter-spacing: 1px;
 }
 
-/* Textarea */
-.letter-area {
-  min-height: 160px;
-  line-height: 1.6;
-}
-
-/* Inputs */
+/* 🖋️ FORM STYLING */
 .soft-input {
   border-radius: 14px;
-  border: 1px solid #e6e6e6;
+  border: 1px solid #eef0f2;
+  background: #fcfdfe;
   padding: 12px;
   font-size: 14px;
 }
 
-/* Button */
+.soft-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.letter-area {
+  min-height: 180px;
+  line-height: 1.6;
+  resize: none;
+}
+
 .action-btn {
   height: 54px;
   border-radius: 18px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  font-weight: 700;
+  transition: transform 0.2s ease;
 }
 
-/* Letter preview */
+.action-btn:active { transform: scale(0.96); }
+
+/* 🔒 SUCCESS VIEW */
 .letter-preview {
-  margin-top: 16px;
-  padding: 16px;
-  border-radius: 18px;
+  padding: 18px;
+  border-radius: 20px;
   background: #f9fafc;
   border: 1px dashed #dee2e6;
+  margin-bottom: 20px;
 }
 
 .preview-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  color: #000;
 }
 
-/* Magic code */
 .magic-code-box {
-  margin-top: 20px;
-  padding: 18px;
-  border-radius: 20px;
+  padding: 24px;
+  border-radius: 24px;
   text-align: center;
-  background: linear-gradient(135deg, #e9f7ef, #f6fffb);
-  box-shadow: 0 12px 26px rgba(32,201,151,0.25);
+  background: linear-gradient(135deg, #000000, #1a1a1a);
+  color: #fff;
+  box-shadow: 0 12px 26px rgba(0,0,0,0.15);
   animation: fadeUp 0.4s ease-out;
 }
 
-.code-label {
-  font-size: 12px;
-  color: #666;
-}
+.code-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 2px; opacity: 0.7; }
+.magic-code { font-size: 32px; font-weight: 800; letter-spacing: 6px; color: #10b981; margin: 10px 0; }
+.code-hint { font-size: 0.75rem; font-weight: 600; color: #888; }
 
-.magic-code {
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: 4px;
-  color: #20c997;
-  margin: 6px 0;
-}
-
-.code-hint {
-  font-size: 12px;
-  color: #777;
-}
-
-/* Animations */
+/* 🪄 ANIMATION */
 @keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+
+
+.nav-brand {
+  display: flex;          /* ✅ Aligns children horizontally */
+  align-items: center;    /* ✅ Centers them vertically */
+  gap: 12px;              /* ✅ Controlled space between icon and text */
+}
+
+.logo-icon.minimalist {
+  background: #000;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;   /* ✅ Required for perfect centering of the icon */
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;         /* ✅ Prevents the black box from shrinking */
+}
+
+.brand-text {
+  color: #000;
+  font-weight: 850;
+  letter-spacing: -0.5px;
+  font-size: 1.1rem;
+  line-height: 1;         /* ✅ Removes extra vertical padding from the font */
+  white-space: nowrap;    /* ✅ Prevents "Letter" from dropping to a new line */
+}
+
+
+

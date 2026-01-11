@@ -20,22 +20,23 @@ export class AppComponent {
 
     if (!Capacitor.isNativePlatform()) return;
 
-    App.addListener('backButton', ({ canGoBack }) => {
+    App.addListener('backButton', () => {
       const now = Date.now();
+      const path = window.location.pathname;
 
-      // 🔹 BACK ONCE → GO TO PREVIOUS PAGE (ANY PAGE)
-      if (canGoBack) {
+      // ✅ NOT home → go back
+      if (path !== '/home') {
         this.location.back();
         return;
       }
 
-      // 🔹 AT ROOT → DOUBLE BACK TO EXIT APP
+      // ✅ HOME → double back to exit
       if (now - this.lastBackPress < this.exitDelay) {
         App.exitApp();
+      } else {
+        this.lastBackPress = now;
+        alert('Press back again to exit');
       }
-
-      this.lastBackPress = now;
     });
   }
 }
-

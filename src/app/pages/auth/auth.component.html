@@ -1,21 +1,35 @@
-<div class="container mt-5 text-center auth-box">
+<div class="login-wrapper">
+  <div class="brand-hero">
+    <div class="logo-box-large">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+    </div>
+    <h1 class="brand-name">Magic Letter</h1>
+    <p class="brand-tagline">Time-locked messages, delivered to the future.</p>
+  </div>
 
-  <h4 class="mb-4 fw-semibold">
-    Welcome to <span class="text-primary">Magic Letter</span>
-  </h4>
+  <div class="auth-box">
+    <div class="drag-handle"></div>
+    
+    <h4 class="auth-title">Welcome Back</h4>
+    <p class="auth-subtitle">Sign in to manage your secret letters</p>
 
-  <button
-    class="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2"
-    [disabled]="isSigningIn"
-    (click)="loginWithGoogle()">
+    <button
+      class="btn-google"
+      [disabled]="isSigningIn"
+      (click)="loginWithGoogle()">
+      
+      @if (!isSigningIn) {
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" class="google-icon">
+        <span>Continue with Google</span>
+      } @else {
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Signing you in...</span>
+      }
+    </button>
 
-    <i class="fa-brands fa-google"></i>
-    {{ isSigningIn ? 'Signing you in…' : 'Continue with Google' }}
-
-  </button>
-
-  <p class="text-muted mt-3" style="font-size: 14px;">
-    Secure sign-in powered by Google
-  </p>
-
+    <p class="secure-note">
+      <i class="fa-solid fa-shield-halved me-1"></i>
+      Secure, encrypted connection
+    </p>
+  </div>
 </div>

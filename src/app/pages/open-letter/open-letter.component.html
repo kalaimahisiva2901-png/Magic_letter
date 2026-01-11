@@ -1,112 +1,129 @@
-<div class="container-page">
-  <div class="app-card">
-
-    <!-- HEADER -->
-   <div class="d-flex align-items-center mb-3 open-header">
-  <button class="icon-btn me-2" (click)="goHome()">
-    <i class="fa-solid fa-arrow-left"></i>
-  </button>
-
-  <div class="d-flex align-items-center gap-2 header-title">
-    <i class="fa-solid fa-unlock"></i>
-    <span>Open Letter</span>
+<nav class="home-navbar">
+  <div class="nav-brand">
+  <div class="logo-icon minimalist" (click)="goHome()" style="cursor: pointer;">
+    <i class="fa-solid fa-envelope-open"></i>
   </div>
+  <span class="brand-text">Open Letter</span>
 </div>
+</nav>
 
-    <!-- INPUT -->
-    <input
-      class="form-control soft-input mb-3"
-      placeholder="Enter magic code"
-      [(ngModel)]="secretCode">
+<div class="container-page">
+  
+  <header class="welcome-section">
+    <h1>Unlock Magic</h1>
+    <p>Enter your secret code to reveal a message from the past.</p>
+  </header>
+
+  <div class="app-card mb-4">
+    <div class="form-group mb-3">
+      <label class="section-title mb-2 d-block">MAGIC CODE</label>
+      <input
+        type="text"
+        class="form-control soft-input text-center fw-bold"
+        style="letter-spacing: 4px; font-size: 1.2rem; text-transform: uppercase;"
+        placeholder="----"
+        [(ngModel)]="secretCode">
+    </div>
 
     <button
-      type="button"
-      class="btn btn-success w-100 action-btn mb-3"
-      (click)="open()">
+      class="btn btn-dark w-100 action-btn"
+      (click)="open()"
+      style="background:#000; border:none;">
       <i class="fa-solid fa-magnifying-glass me-2"></i>
       Check Letter
     </button>
 
-    <!-- ERROR -->
     @if (message) {
-      <div class="alert alert-danger small">
-        <i class="fa-solid fa-circle-exclamation me-2"></i>
+      <div class="alert alert-danger mt-3" style="border-radius:12px; font-size:0.9rem;">
         {{ message }}
       </div>
     }
-
-    <!-- LOCKED -->
-    @if (status === 'locked') {
-
-      @if (!isFinalSeconds) {
-        <div class="alert alert-warning">
-          <div class="d-flex justify-content-between">
-            <span>Unlocks in</span>
-            <strong>{{ remainingText }}</strong>
-          </div>
-
-          <div class="progress mt-2">
-            <div
-              class="progress-bar bg-warning"
-              [style.width.%]="progress">
-            </div>
-          </div>
-        </div>
-      }
-
-      @if (isFinalSeconds) {
-        <div class="final-countdown">
-          <div class="pulse-ring"></div>
-          <i class="fa-solid fa-hourglass-half countdown-icon"></i>
-          <div class="big-seconds">
-            {{ finalSeconds }}
-          </div>
-          <div class="small text-muted">
-            seconds remaining
-          </div>
-        </div>
-      }
-
-    }
-
-    <!-- READY -->
-   @if (status === 'ready') {
-  <div class="ready-hero">
-    <!-- glow pulse -->
-    <div class="ready-glow"></div>
-
-    <!-- animated icon -->
-    <div class="ready-icon">
-      <i class="fa-solid fa-lock-open"></i>
-    </div>
-
-    <!-- text -->
-    <p class="ready-title">
-      Letter is ready
-    </p>
-
-    <p class="ready-sub">
-      Tap to reveal your message
-    </p>
-
-    <!-- CTA -->
-    <button
-      class="btn ready-action"
-      (click)="unlock()">
-      <i class="fa-solid fa-envelope-open me-2"></i>
-      Open Letter
-    </button>
   </div>
-}
 
-
-    <!-- OPENED -->
-    @if (status === 'opened') {
-      <div class="alert alert-success mt-3">
-        <i class="fa-solid fa-envelope-open-text me-2"></i>
-        {{ letterText }}
+  @if (status === 'locked') {
+    @if (!isFinalSeconds) {
+      <div class="app-card mb-4" style="background: #fff8e1; border: 1px solid #ffeeba;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="section-title" style="color: #856404;">UNLOCKING IN...</span>
+          <strong style="color: #856404;">{{ remainingText }}</strong>
+        </div>
+        <div class="progress" style="height: 10px; background: rgba(0,0,0,0.05); border-radius: 10px;">
+          <div class="progress-bar bg-warning" [style.width.%]="progress"></div>
+        </div>
       </div>
     }
 
-  </div>
+    @if (isFinalSeconds) {
+      <div class="final-countdown">
+        <div class="pulse-ring"></div>
+        <i class="fa-solid fa-hourglass-half countdown-icon"></i>
+        <div class="big-seconds">{{ finalSeconds }}</div>
+        <div class="small opacity-75">seconds remaining</div>
+      </div>
+    }
+  }
+
+  @if (status === 'unlocked') {
+    <div class="ready-hero">
+      <div class="ready-glow"></div>
+      <div class="ready-icon">
+        <i class="fa-solid fa-lock-open"></i>
+      </div>
+      <p class="ready-title">Letter is ready</p>
+      <p class="ready-sub">The seal has vanished. Tap to reveal.</p>
+          <button
+      type="button"
+      class="btn ready-action"
+      (click)="openLetter()"
+    >
+      <i class="fa-solid fa-envelope-open me-2"></i>
+      Open Now
+    </button>
+
+    </div>
+  }
+
+  @if (status === 'opened') {
+    <div class="app-card mb-4" style="border-left: 5px solid #10b981; animation: riseIn 0.5s ease-out;">
+      <label class="section-title mb-2 d-block">MESSAGE REVEALED</label>
+      <p class="letter-text" style="font-size: 1.1rem; line-height: 1.6; color: #1e293b; white-space: pre-wrap;">
+        {{ letterText }}
+      </p>
+    </div>
+  }
+
+  @if (lettersTable.length > 0) {
+    <div class="content-segment mt-2">
+      <div class="segment-header">
+        <span class="section-title">YOUR CODES</span>
+        <span class="badge">{{ lettersTable.length }}</span>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="table lock-table">
+          <tbody>
+            @for (letter of lettersTable; track letter.code) {
+              <tr [class.opened-row]="letter.status === 'opened'">
+                <td class="fw-bold">
+                  <span class="text-monospace">#{{ letter.code }}</span>
+                </td>
+                <td>
+                  @if (letter.status === 'locked') {
+                    <span class="badge bg-light text-dark border">Locked</span>
+                  } @else if (letter.status === 'unlocked') {
+                    <span class="badge bg-warning text-dark">Ready</span>
+                  } @else {
+                    <span class="badge bg-success">Opened</span>
+                  }
+                </td>
+                <td class="text-end">
+                  <small class="text-muted">{{ letter.unlockAt | date:'shortTime' }}</small>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
 </div>

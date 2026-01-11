@@ -1,40 +1,93 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LetterService } from '../../services/letter.service';
+import { CommonModule } from '@angular/common';
+import { SessionDataService } from '../../services/session-data.service';
+import { Auth } from '@angular/fire/auth';
+
+/* ---------- TYPES ---------- */
+type LetterStatus = 'locked' | 'unlocked' | 'opened';
+
+interface LetterRow {
+  code: string;
+  unlockAt: number;
+  letterText: string;
+  status: LetterStatus;
+}
 
 @Component({
   selector: 'app-open-letter',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './open-letter.component.html',
   styleUrl: './open-letter.component.css'
 })
-export class OpenLetterComponent implements OnDestroy {
+export class OpenLetterComponent implements OnInit, OnDestroy {
 
   secretCode = '';
   letterText = '';
   message = '';
 
-  status: 'locked' | 'ready' | 'opened' | null = null;
+  status: LetterStatus | null = null;
 
-  unlockAt = 0;
   remainingText = '';
   progress = 0;
 
-  // 🔥 final 60 seconds
   isFinalSeconds = false;
   finalSeconds = 0;
 
+  lettersTable: LetterRow[] = [];
+
   private timer: any;
+  private currentCode = '';
+
+  // 🔐 session keys
+  private readonly TABLE_KEY = 'open_letters_table';
 
   constructor(
     private letterService: LetterService,
+    private sessionData: SessionDataService,
+    private auth: Auth,
     private router: Router
   ) {}
 
+  /* ---------- FIREBASE USER ID ---------- */
+  get userId(): string {
+    return this.auth.currentUser?.uid ?? '';
+  }
+
+  /* ---------- LOAD SESSION DATA ---------- */
+  ngOnInit() {
+    if (!this.userId) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    const table = this.sessionData.get<LetterRow[]>(
+      this.TABLE_KEY,
+      this.userId
+    );
+
+    if (table) {
+      this.lettersTable = table;
+      this.sortTable();
+    }
+
+    // ❌ DO NOT restore secretCode (important)
+    this.secretCode = '';
+  }
+
+  /* ---------- ENTER CODE ---------- */
   async open() {
-    this.reset();
+    clearInterval(this.timer);
+
+    this.status = null;
+    this.message = '';
+    this.remainingText = '';
+    this.progress = 0;
+    this.isFinalSeconds = false;
+    this.finalSeconds = 0;
 
     if (!this.secretCode) {
       this.message = 'Please enter secret code';
@@ -48,20 +101,39 @@ export class OpenLetterComponent implements OnDestroy {
       return;
     }
 
-    this.unlockAt = Number(data['unlockAt']);
-    const now = Date.now();
+    this.currentCode = this.secretCode;
 
-    if (now >= this.unlockAt) {
-      this.status = 'ready';
-      this.letterText = data['letterText'];
+    const now = Date.now();
+    const unlockAt = Number(data['unlockAt']);
+
+    let row = this.lettersTable.find(
+      l => l.code === this.currentCode
+    );
+
+    if (!row) {
+      row = {
+        code: this.currentCode,
+        unlockAt,
+        letterText: data['letterText'],
+        status: now < unlockAt ? 'locked' : 'unlocked'
+      };
+      this.lettersTable.push(row);
+    }
+
+    this.sortTable();
+    this.saveTable();
+
+    if (now < unlockAt) {
+      this.status = 'locked';
+      this.startTimer(unlockAt);
       return;
     }
 
-    this.status = 'locked';
-    this.startTimer(this.unlockAt, data['letterText']);
+    this.status = 'unlocked';
   }
 
-  startTimer(unlockAt: number, letter: string) {
+  /* ---------- COUNTDOWN ---------- */
+  startTimer(unlockAt: number) {
     const total = unlockAt - Date.now();
 
     this.timer = setInterval(() => {
@@ -69,16 +141,21 @@ export class OpenLetterComponent implements OnDestroy {
 
       if (diff <= 0) {
         clearInterval(this.timer);
-        this.status = 'ready';
-        this.isFinalSeconds = false;
-        this.progress = 100;
-        this.letterText = letter;
+
+        this.status = 'unlocked';
+
+        const row = this.lettersTable.find(
+          l => l.code === this.currentCode
+        );
+        if (row) row.status = 'unlocked';
+
+        this.sortTable();
+        this.saveTable();
         return;
       }
 
       const seconds = Math.floor(diff / 1000);
 
-      // 🔥 FINAL 60 SECONDS MODE
       if (seconds <= 60) {
         this.isFinalSeconds = true;
         this.finalSeconds = seconds;
@@ -87,12 +164,54 @@ export class OpenLetterComponent implements OnDestroy {
         this.remainingText = this.format(diff);
         this.progress = 100 - Math.floor((diff / total) * 100);
       }
-
     }, 1000);
   }
 
-  unlock() {
+  /* ---------- USER OPENS LETTER ---------- */
+  openLetter() {
     this.status = 'opened';
+
+    const row = this.lettersTable.find(
+      l => l.code === this.currentCode
+    );
+
+    if (row) {
+      row.status = 'opened';
+      this.letterText = row.letterText;
+    }
+
+    this.sortTable();
+    this.saveTable();
+
+    // ✅ RESET FORM STATE
+    this.secretCode = '';
+    this.currentCode = '';
+    this.message = '';
+  }
+
+  /* ---------- SESSION STORAGE ---------- */
+  saveTable() {
+    this.sessionData.set(
+      this.TABLE_KEY,
+      this.userId,
+      this.lettersTable
+    );
+  }
+
+  /* ---------- SORT ---------- */
+  sortTable() {
+    const order: Record<LetterStatus, number> = {
+      locked: 0,
+      unlocked: 1,
+      opened: 2
+    };
+
+    this.lettersTable.sort((a, b) => {
+      if (order[a.status] !== order[b.status]) {
+        return order[a.status] - order[b.status];
+      }
+      return a.unlockAt - b.unlockAt;
+    });
   }
 
   format(ms: number): string {
@@ -103,17 +222,6 @@ export class OpenLetterComponent implements OnDestroy {
     return `${d}d ${h % 24}h ${m % 60}m ${s % 60}s`;
   }
 
-  reset() {
-    clearInterval(this.timer);
-    this.status = null;
-    this.letterText = '';
-    this.message = '';
-    this.progress = 0;
-    this.remainingText = '';
-    this.isFinalSeconds = false;
-    this.finalSeconds = 0;
-  }
-
   goHome() {
     this.router.navigate(['/home']);
   }
@@ -122,4 +230,3 @@ export class OpenLetterComponent implements OnDestroy {
     clearInterval(this.timer);
   }
 }
-

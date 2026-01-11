@@ -1,94 +1,105 @@
-<!-- 🔝 NAVBAR -->
 <nav class="home-navbar">
-  <div class="nav-left">
-    <i class="fa-solid fa-lock me-2"></i>
-    Magic Letter
+  <div class="nav-brand">
+    <div class="logo-icon minimalist">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+    </div>
+    <span class="brand-text">Magic Letter</span>
   </div>
 
-  <button class="icon-btn" (click)="openSettings()">
-    <i class="fa-solid fa-gear"></i>
+  <button class="settings-trigger" (click)="openSettings()">
+    <img src="https://ui-avatars.com/api/?name={{userName}}&background=000&color=fff" class="nav-avatar" />
   </button>
 </nav>
 
-<!-- 🔽 PAGE CONTENT -->
-<div class="container-page home-screen">
+<div class="page-content-wrapper">
+  <div class="container-page home-screen">
+    
+    <header class="welcome-section">
+      <h1>Hello, {{ userName.split(' ')[0] }}!</h1>
+      <p>What magic shall we lock away today?</p>
+    </header>
 
-  <!-- ACTIONS -->
-  <div class="app-card mb-4 home-actions">
-    <button
-      class="btn btn-primary w-100 action-btn mb-3"
-      (click)="goToLock()">
-      <i class="fa-solid fa-lock me-2"></i>
-      Lock a Letter
-    </button>
+    <div class="action-grid mb-4">
+      <button class="glass-btn secondary" (click)="goToLock()">
+        <div class="icon-circle lock-icon">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <span>Lock New</span>
+      </button>
 
-    <button
-      class="btn btn-outline-success w-100 action-btn"
-      (click)="goToOpen()">
-      <i class="fa-solid fa-unlock me-2"></i>
-      Open a Letter
-    </button>
-  </div>
+      <button class="glass-btn secondary" (click)="goToOpen()">
+        <div class="icon-circle open-icon">
+          <i class="fa-solid fa-envelope-open"></i>
+        </div>
+        <span>Open Ready</span>
+      </button>
+    </div>
 
-  <!-- LETTER LIST -->
-  @if (letters.length > 0) {
-    <div class="app-card letter-history">
-
-      <div class="section-title mb-3">
-        <i class="fa-solid fa-envelope-open-text me-2"></i>
-        Your Letters
+    <div class="content-segment">
+      <div class="segment-header">
+        <h3>Your Time Capsules</h3>
+        <span class="badge">{{ letters.length }}</span>
       </div>
 
-      @for (l of letters; track $index) {
-        <div class="list-item d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center gap-2">
-            <span
-              class="status-dot"
-              [class.locked]="isLocked(l)"
-              [class.opened]="!isLocked(l)">
-            </span>
-
-            <span class="fw-medium">
-              {{ isLocked(l) ? 'Locked' : 'Opened' }}
-            </span>
+      @if (letters.length > 0) {
+        <div class="letter-list-container">
+          @for (l of letters; track $index) {
+            <div class="letter-card">
+              <div class="letter-info">
+                <div class="status-indicator" [class.locked]="isLocked(l)">
+                  <i [class]="isLocked(l) ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'"></i>
+                </div>
+                <div class="details">
+                  <span class="recipient">To: {{ l.receiverName || 'Future Me' }}</span>
+                  <span class="status-text">{{ isLocked(l) ? 'Sealed' : 'Unlocked' }}</span>
+                </div>
+              </div>
+              <div class="letter-meta">
+                <span class="time-left">
+                  <i class="fa-regular fa-clock"></i> {{ getTime(l.unlockAt) }}
+                </span>
+                <i class="fa-solid fa-chevron-right arrow-icon"></i>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state-v2">
+          <div class="empty-icon-wrap">
+            <i class="fa-solid fa-feather-pointed"></i>
           </div>
-
-          <small class="time-text">
-            <i class="fa-regular fa-clock me-1"></i>
-            {{ getTime(l.unlockAt) }}
-          </small>
+          <p>No magic letters yet.<br>Start a tradition today.</p>
         </div>
       }
     </div>
-  }
-
-  <!-- EMPTY -->
-  @if (letters.length === 0) {
-    <div class="empty-state">
-      <div class="empty-icon">
-        <i class="fa-solid fa-envelope-circle-check"></i>
-      </div>
-      <p>No letters yet</p>
-      <small>Create one to get started</small>
-    </div>
-  }
+  </div>
 </div>
 
-<!-- ⚙️ SETTINGS DRAWER -->
 @if (showSettings) {
   <div class="drawer-backdrop" (click)="closeSettings()"></div>
 
   <div class="drawer-right" (click)="$event.stopPropagation()">
     <div class="drawer-header">
       <img
-        class="avatar"
-        src="https://ui-avatars.com/api/?name={{userName}}&background=6c7cff&color=fff" />
-      <div class="fw-semibold mt-2">{{ userName }}</div>
+        class="avatar-large"
+        src="https://ui-avatars.com/api/?name={{userName}}&background=000&color=fff" />
+      <div class="user-name-text mt-3">{{ userName }}</div>
       <small class="text-muted">{{ userEmail }}</small>
     </div>
-      <div class="drawer-body"></div>
+
+    <div class="drawer-body">
+      <div class="menu-item">
+        <i class="fa-solid fa-circle-user"></i>
+        <span>Edit Profile</span>
+      </div>
+      <div class="menu-item">
+        <i class="fa-solid fa-bell"></i>
+        <span>Notifications</span>
+      </div>
+    </div>
+
     <div class="drawer-footer">
-      <button class="btn btn-outline-danger w-100" (click)="logout()">
+      <button class="btn-logout" (click)="logout()">
         <i class="fa-solid fa-right-from-bracket me-2"></i>
         Logout
       </button>

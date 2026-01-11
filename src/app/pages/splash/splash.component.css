@@ -1,11 +1,9 @@
-/* ===============================
-   📱 DEFAULT = PHONE (FULL SCREEN)
-   =============================== */
-
+/* ✅ 1. FULL SCREEN OVERLAY */
 :host {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999; /* Highest priority */
+  background: #f4f6f9; /* Matches your --bg-light */
 }
 
 .splash-container {
@@ -14,30 +12,113 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0d6efd, #6610f2);
+  overflow: hidden;
+  position: relative;
 }
 
-.splash-card {
-  text-align: center;
-  color: white;
+/* ✅ 2. MAGIC GLOW BACKGROUND */
+.magic-glow {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  filter: blur(40px);
+  animation: floatGlow 4s ease-in-out infinite;
 }
 
-.splash-icon {
-  font-size: 48px;
+/* ✅ 3. THE LOGO BOX (Matches your minimalist branding) */
+.logo-wrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  display: grid;
+  place-items: center;
 }
 
+.logo-box {
+  width: 64px;
+  height: 64px;
+  background: #000;
+  color: #fff;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  z-index: 2;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
 
-/* ===============================
-   💻 TABLET / DESKTOP OVERRIDE
-   =============================== */
+.magic-icon {
+  animation: iconSparkle 2s infinite;
+}
 
-@media (min-width: 769px) {
-  :host {
-    position: static;
-  }
+/* ✅ 4. TYPOGRAPHY & LOADING */
+.app-name {
+  font-weight: 900;
+  color: #000;
+  letter-spacing: -1px;
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+}
 
-  .splash-container {
-    height: 100%;
-    width: 100%;
-  }
+.loading-bar-container {
+  width: 140px;
+  height: 4px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 10px;
+  margin: 0 auto 12px;
+  overflow: hidden;
+}
+
+.loading-bar-progress {
+  height: 100%;
+  width: 40%;
+  background: #000;
+  border-radius: 10px;
+  animation: loadingMove 1.5s infinite ease-in-out;
+}
+
+.loading-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ✅ 5. ANIMATIONS */
+
+/* Subtle background movement */
+@keyframes floatGlow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-20px, 20px) scale(1.2); }
+}
+
+/* Smooth loading bar movement */
+@keyframes loadingMove {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+
+/* Gentle sparkle animation for the icon */
+@keyframes iconSparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.9); }
+}
+
+/* Pulse ring effect around logo */
+.pulse-ring {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border: 2px solid #000;
+  border-radius: 18px;
+  animation: ringPulse 2s infinite;
+  z-index: 1;
+}
+
+@keyframes ringPulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.6); opacity: 0; }
 }

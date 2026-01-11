@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LetterService } from '../../services/letter.service';
@@ -11,11 +11,13 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './lock-letter.component.html',
   styleUrl: './lock-letter.component.css'
 })
-export class LockLetterComponent implements OnDestroy {
+export class LockLetterComponent implements OnInit, OnDestroy {
 
+  // 🔐 LOCK FORM
   text = '';
-  date = '';
-  time = '';
+  date = new Date().toISOString().split('T')[0];
+  time = new Date().toTimeString().slice(0, 5);
+  receiverName = '';
 
   code = '';
   message = '';
@@ -24,10 +26,12 @@ export class LockLetterComponent implements OnDestroy {
   countdown = 5;
   isSaving = false;
 
-  // keep preview safe
   previewText = '';
-
   private timer: any;
+
+  // 📋 LOCKED LETTERS TABLE
+  letters: any[] = [];
+  now = Date.now();
 
   constructor(
     private letterService: LetterService,
@@ -35,27 +39,43 @@ export class LockLetterComponent implements OnDestroy {
     private router: Router
   ) {}
 
+  /* =====================
+     LOAD LOCKED LETTERS
+  ====================== */
+  async ngOnInit() {
+    const user = this.auth.getUser();
+    if (!user) return;
+
+    this.letters = await this.letterService.getMyLetters(user.uid);
+
+    // update time for countdown display
+    this.timer = setInterval(() => {
+      this.now = Date.now();
+    }, 1000);
+  }
+
+  /* =====================
+     LOCK LETTER
+  ====================== */
   async lock() {
     this.message = '';
 
-    // 🔒 VALIDATION (IMPORTANT)
+    if (!this.receiverName.trim()) {
+      this.message = 'Please enter receiver name';
+      return;
+    }
+
     if (!this.text.trim()) {
       this.message = 'Please write your letter';
       return;
     }
 
-    if (!this.date) {
-      this.message = 'Please select a date';
-      return;
-    }
-
-    if (!this.time) {
-      this.message = 'Please select a time';
+    if (!this.date || !this.time) {
+      this.message = 'Please select date and time';
       return;
     }
 
     const unlockAt = new Date(`${this.date}T${this.time}`).getTime();
-
     if (unlockAt <= Date.now()) {
       this.message = 'Unlock time must be in the future';
       return;
@@ -71,7 +91,7 @@ export class LockLetterComponent implements OnDestroy {
       return;
     }
 
-    // keep preview BEFORE clearing
+    // keep preview
     this.previewText = this.text.trim();
 
     this.code = Math.random()
@@ -81,31 +101,58 @@ export class LockLetterComponent implements OnDestroy {
 
     await this.letterService.saveLetter({
       userId,
+      receiverName: this.receiverName.trim(),
       letterText: this.previewText,
       unlockAt,
       secretCode: this.code,
       createdAt: Date.now()
     });
 
-    // UI state
     this.showCode = true;
     this.startCountdown();
 
-    // clear form inputs (NOT preview)
+    // clear inputs
     this.text = '';
+    this.receiverName = '';
     this.date = '';
     this.time = '';
     this.isSaving = false;
+
+    // 🔄 reload letters so table updates
+    this.letters = await this.letterService.getMyLetters(userId);
   }
 
+  /* =====================
+     HELPERS FOR TABLE
+  ====================== */
+  isLocked(letter: any) {
+    return this.now < letter.unlockAt;
+  }
+
+  getTime(unlockAt: number) {
+    const diff = unlockAt - this.now;
+    if (diff <= 0) return 'Unlocked';
+
+    const s = Math.floor((diff / 1000) % 60);
+    const m = Math.floor((diff / 60000) % 60);
+    const h = Math.floor((diff / 3600000) % 24);
+    const d = Math.floor(diff / 86400000);
+
+    if (d) return `${d}d ${h}h`;
+    if (h) return `${h}h ${m}m`;
+    if (m) return `${m}m ${s}s`;
+    return `${s}s`;
+  }
+
+  /* =====================
+     UI HELPERS
+  ====================== */
   startCountdown() {
     if (this.timer) clearInterval(this.timer);
 
     this.countdown = 5;
-
     this.timer = setInterval(() => {
       this.countdown--;
-
       if (this.countdown === 0) {
         this.showCode = false;
         clearInterval(this.timer);

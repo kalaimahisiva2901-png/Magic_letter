@@ -1,53 +1,45 @@
 import { Injectable } from '@angular/core';
 import {
   Firestore,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  serverTimestamp
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where
 } from '@angular/fire/firestore';
-import { User } from 'firebase/auth';
 
 @Injectable({ providedIn: 'root' })
-export class UserService {
+export class LetterService {
 
   constructor(private firestore: Firestore) {}
 
-  // 🔥 CREATE USER IF NOT EXISTS
-  async saveUser(user: User) {
-    const ref = doc(this.firestore, 'users', user.uid);
-    const snap = await getDoc(ref);
-
-    if (snap.exists()) return;
-
-    await setDoc(ref, {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || 'User',
-      photoURL: user.photoURL || null,
-      provider: user.providerData[0]?.providerId || 'password',
-      createdAt: serverTimestamp()
-    });
+  // 🔐 SAVE LETTER
+  saveLetter(data: any) {
+    return addDoc(collection(this.firestore, 'letters'), data);
   }
 
-  // 📥 GET PROFILE
-  async getUserProfile(uid: string) {
-    const ref = doc(this.firestore, 'users', uid);
-    const snap = await getDoc(ref);
-    return snap.exists() ? snap.data() : null;
+  // 🔐 GET ONLY MY LETTERS
+  async getMyLetters(userId: string) {
+    const q = query(
+      collection(this.firestore, 'letters'),
+      where('userId', '==', userId)
+    );
+
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
   }
 
-  // ✏️ UPDATE PROFILE
-  updateProfile(uid: string, data: any) {
-    const ref = doc(this.firestore, 'users', uid);
-    return updateDoc(ref, data);
-  }
+  // 🔓 GET LETTER BY MAGIC CODE
+  async getLetterByCode(code: string) {
+    const q = query(
+      collection(this.firestore, 'letters'),
+      where('secretCode', '==', code)
+    );
 
-  // 🗑 DELETE USER DOCUMENT
-  deleteUser(uid: string) {
-    const ref = doc(this.firestore, 'users', uid);
-    return deleteDoc(ref);
+    const snap = await getDocs(q);
+    return snap.empty ? null : snap.docs[0].data();
   }
 }

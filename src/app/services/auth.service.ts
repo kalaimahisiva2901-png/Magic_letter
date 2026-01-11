@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Auth, signOut, GoogleAuthProvider, signInWithPopup, signInWithCredential, user, User } from '@angular/fire/auth';
+import {
+  Auth,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithCredential,
+  user,
+  User
+} from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
@@ -18,7 +26,7 @@ export class AuthService {
   /* ---------- GOOGLE LOGIN (WEB + ANDROID) ---------- */
   async googleLogin(): Promise<User | null> {
 
-    // 📱 ANDROID / IOS (CAPACITOR)
+    // 📱 ANDROID / IOS
     if (Capacitor.isNativePlatform()) {
       const googleUser = await GoogleAuth.signIn();
 
@@ -30,7 +38,7 @@ export class AuthService {
       return result.user;
     }
 
-    // 🌐 WEB BROWSER
+    // 🌐 WEB
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
 

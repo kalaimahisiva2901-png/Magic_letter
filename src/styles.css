@@ -1,162 +1,114 @@
 
 
-
-/* ===== ROOT SCROLL FIX ===== */
-html, body {
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+/* ✅ 1. THE ROOT SCROLL FIX */
+/* This ensures the entire app container can grow and scroll naturally */
+html, body, app-root {
   margin: 0;
   padding: 0;
+  height: auto !important; /* Allow height to grow with content */
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto !important; /* Force vertical scroll availability */
+  background: #f4f6f9; /* Global background */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  display: block; /* Ensure app-root behaves like a div */
 }
 
-/* ===== APP BACKGROUND ===== */
-body {
-  background: #f4f6f9;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+:root {
+  --primary: #6366f1;
+  --secondary: #10b981;
+  --bg-light: #f4f6f9;
+  --text-main: #000000;
+  --text-muted: #64748b;
 }
 
-/* ===== MAIN PAGE CONTAINER ===== */
-.container-page {
-  max-width: 420px;
-  margin: auto;
-  padding: 16px;
-
-  /* 🔥 SCROLL FIX */
-  min-height: calc(100vh - 56px);
-}
-
-/* ===== TOP BAR ===== */
-.top-bar {
+/* ✅ 2. FIXED NAVBAR & INLINE BRANDING */
+.home-navbar {
+  height: 70px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: fixed;
+  top: 0; 
+  left: 0; 
+  right: 0;
+  max-width: 420px; /* Locked mobile width */
+  margin: 0 auto;
+  z-index: 1000;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-radius: 0 0 16px 16px;
+  box-sizing: border-box;
 }
 
-.top-bar h6 {
-  margin: 0;
-  font-weight: 600;
+/* Force Brand Icon and Text Inline */
+.nav-brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px;
 }
 
-/* ===== CARDS ===== */
-.card-ui {
-  background: #fff;
-  border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+.brand-text { 
+  color: #000; 
+  font-weight: 850; 
+  letter-spacing: -0.8px; 
+  font-size: 1.1rem;
+  line-height: 1; /* Keeps it centered with icon */
+  white-space: nowrap;
 }
 
-/* ===== ICON BUTTON ===== */
-.icon-btn {
-  border: none;
-  background: none;
-  font-size: 18px;
-  color: #555;
+.logo-icon.minimalist {
+  background: #000; 
+  color: #fff; 
+  width: 32px; 
+  height: 32px;
+  border-radius: 8px; 
+  display: inline-flex !important; /* Changed from grid to inline-flex */
+  align-items: center; 
+  justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
 }
 
-/* ===== UI POLISH ===== */
-.alert {
-  border-radius: 10px;
-}
-
-.btn {
-  border-radius: 10px;
-}
-
-
+/* ✅ 3. MAIN PAGE CONTAINER */
 .container-page {
-  padding: 14px;
-}
-
-.app-card {
-  background: #ffffff;
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.06);
-}
-
-.section-title {
-  font-weight: 600;
-  font-size: 14px;
-  color: #444;
-}
-
-.action-btn {
-  height: 48px;
-  font-weight: 500;
-  border-radius: 12px;
-}
-
-.soft-input {
-  border-radius: 12px;
-  border: 1px solid #e5e5e5;
-}
-
-.soft-input:focus {
-  box-shadow: 0 0 0 2px rgba(13,110,253,0.15);
-}
-
-.icon-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-}
-
-.list-item {
-  padding: 10px 4px;
-  border-bottom: 1px solid #f1f1f1;
-}
-
-.empty-state {
-  text-align: center;
-  margin-top: 60px;
-  color: #888;
-}
-
-.empty-state i {
-  font-size: 48px;
-  margin-bottom: 10px;
-}
-
-.magic-code-box {
-  text-align: center;
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 14px;
-}
-
-.magic-code {
-  font-size: 28px;
-  font-weight: 700;
-  color: #198754;
-  letter-spacing: 4px;
-}
-
-
-
-
-/* ===============================
-   MOBILE WIDTH NAVBAR FIX
-================================ */
-.navbar {
   max-width: 420px;
   margin: 0 auto;
-  left: 0;
-  right: 0;
-  border-radius: 0 0 16px 16px;
+  padding: 90px 16px 50px; /* Room for the 70px nav */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
-/* Align page content with navbar */
-.page-wrapper {
-  padding-top: 56px;
-  max-width: 420px;
-  margin: auto;
+/* ✅ 4. SHARED UI COMPONENTS (List, Cards, Buttons) */
+.welcome-section h1 { font-size: 1.8rem; font-weight: 900; color: #000; letter-spacing: -1px; margin: 0 0 4px 0; }
+.welcome-section p { color: var(--text-muted); font-size: 0.95rem; margin: 0 0 24px 0; }
+
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 30px; }
+.glass-btn.secondary {
+  border: none; background: #fff; padding: 20px 10px; border-radius: 24px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font-weight: 700; color: #000; box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+  cursor: pointer; transition: transform 0.2s ease;
 }
 
+.letter-card {
+  background: #fff; border-radius: 20px; padding: 16px; margin-bottom: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
 
-
-
+/* ✅ 5. DRAWER SYSTEM */
+.drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(4px); z-index: 2000; }
 .drawer-right {
-  transition: transform 0.25s ease;
+  position: fixed; top: 0; right: 0; bottom: 0; width: 260px;
+  background: #fff; z-index: 2001; display: flex; flex-direction: column;
+  box-shadow: -5px 0 30px rgba(0,0,0,0.1);
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }

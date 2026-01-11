@@ -39,7 +39,18 @@ export class HomeComponent implements OnInit, OnDestroy {
           .replace(/\b\w/g, c => c.toUpperCase())
       : 'User';
 
-    this.letters = await this.letterService.getMyLetters(user.uid);
+    const data = await this.letterService.getMyLetters(user.uid);
+
+    // ✅ LOCKED FIRST → UNLOCKED LAST
+    this.letters = data.sort((a: any, b: any) => {
+      const aLocked = a.unlockAt > Date.now();
+      const bLocked = b.unlockAt > Date.now();
+
+      if (aLocked && !bLocked) return -1; // a up
+      if (!aLocked && bLocked) return 1;  // b up
+
+      return a.unlockAt - b.unlockAt; // time order
+    });
 
     this.timer = setInterval(() => {
       this.now = Date.now();
