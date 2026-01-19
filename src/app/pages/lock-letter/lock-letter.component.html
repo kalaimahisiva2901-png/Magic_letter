@@ -1,70 +1,73 @@
 <nav class="home-navbar">
-  <div class="nav-brand">
-  <div class="logo-icon minimalist" (click)="goHome()" style="cursor: pointer;">
-    <i class="fa-solid fa-lock"></i>
+  <div class="nav-brand" (click)="goHome()" style="cursor: pointer;">
+    <div class="logo-icon minimalist">
+      <i class="fa-solid fa-lock"></i>
+    </div>
+    <span class="brand-text">Lock Letter</span>
   </div>
-  <span class="brand-text">Lock Letter</span>
-</div>
 </nav>
 
 <div class="container-page">
-  
   <header class="welcome-section">
-    <h1>Create Magic</h1>
-    <p>Write a message that will remain sealed until the perfect moment.</p>
+    <h1 class="fade-in-up">Create Magic</h1>
+    <p class="fade-in-up-delay">Write a message that will remain sealed until the perfect moment.</p>
   </header>
 
-  <div class="app-card">
-    
+  <div class="app-card shadow-soft">
     @if (message) {
-      <div class="alert alert-danger" style="border-radius:12px; font-size:0.9rem; margin-bottom:16px;">
+      <div class="alert alert-custom animate-shake">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>
         {{ message }}
       </div>
     }
 
     @if (!showCode) {
-      <div class="form-group mb-3">
-        <label class="section-title mb-2 d-block">RECIPIENT</label>
-        <div class="input-group">
-          <span class="input-group-text bg-white border-end-0" style="border-radius:14px 0 0 14px;">
-            <i class="fa-solid fa-user" style="color:#6366f1;"></i>
-          </span>
+      <div class="form-group mb-4">
+        <label class="section-title">RECIPIENT</label>
+        <div class="input-wrapper">
           <input
             type="text"
-            class="form-control soft-input border-start-0"
-            style="border-radius:0 14px 14px 0; padding-left:0;"
+            class="form-control soft-input"
             placeholder="Future Me / Someone Special"
-            [(ngModel)]="receiverName">
+            [(ngModel)]="receiverName"
+          >
         </div>
       </div>
 
-      <div class="form-group mb-3">
-        <label class="section-title mb-2 d-block">YOUR MESSAGE</label>
+      <div class="form-group mb-4">
+        <div class="d-flex justify-content-between">
+          <label class="section-title">YOUR MESSAGE</label>
+          <span class="char-count">{{ text ? text.length : 0 }} chars</span>
+        </div>
         <textarea
           class="form-control soft-input letter-area"
           placeholder="What do you want to remember?"
-          [(ngModel)]="text">
-        </textarea>
+          [(ngModel)]="text"
+        ></textarea>
       </div>
 
-      <div class="row g-2 mb-4">
+      <div class="row g-3 mb-4">
         <div class="col-6">
-          <label class="section-title mb-2 d-block">UNLOCK DATE</label>
+          <label class="section-title">UNLOCK DATE</label>
           <input type="date" class="form-control soft-input" [(ngModel)]="date">
         </div>
         <div class="col-6">
-          <label class="section-title mb-2 d-block">TIME</label>
+          <label class="section-title">TIME</label>
           <input type="time" class="form-control soft-input" [(ngModel)]="time">
         </div>
       </div>
 
       <button
-        class="btn btn-dark w-100 action-btn"
-        [disabled]="isSaving"
+        class="btn btn-dark w-100 action-btn mt-2"
+        [disabled]="isSaving || !text"
         (click)="lock()"
-        style="background:#000; border:none;">
-        <i class="fa-solid fa-key me-2"></i>
-        Seal this Magic
+      >
+        @if (!isSaving) {
+          <i class="fa-solid fa-key me-2"></i>
+          Seal this Magic
+        } @else {
+          <div class="spinner-border spinner-border-sm"></div>
+        }
       </button>
 
       <div class="text-center mt-3">
@@ -75,29 +78,31 @@
     }
 
     @if (showCode) {
-      <div class="letter-preview">
-        <div class="preview-header">
-          <i class="fa-solid fa-envelope-open-text" style="color:#6366f1;"></i>
-          <span>Letter Sealed Successfully</span>
+      <div class="success-state">
+        <div class="letter-preview">
+          <div class="preview-header">
+            <i class="fa-solid fa-envelope-open-text" style="color:#6366f1;"></i>
+            <span>Letter Sealed Successfully</span>
+          </div>
+          <p class="letter-text" style="font-size:0.9rem; color:#444; margin:0;">{{ previewText }}</p>
         </div>
-        <p class="letter-text" style="font-size:0.9rem; color:#444; margin:0;">
-          {{ previewText }}
-        </p>
-      </div>
 
-      <div class="magic-code-box">
-        <span class="code-label">YOUR MAGIC CODE</span>
-        <div class="magic-code">{{ code }}</div>
-        <div class="code-hint">
-          <i class="fa-solid fa-clock-rotate-left me-1"></i>
-          Hiding in {{ countdown }}s
+        <div class="magic-code-box">
+          <span class="code-label">YOUR MAGIC CODE</span>
+          <div class="d-flex align-items-center justify-content-center gap-2">
+            <div class="magic-code">{{ code }}</div>
+            <i class="fa-regular fa-copy" (click)="copyCode(code)" style="cursor: pointer; color: #10b981;"></i>
+          </div>
         </div>
-      </div>
 
-      <button class="btn btn-outline-dark w-100 action-btn mt-4" (click)="goHome()" style="border-radius:18px;">
-        Go to Dashboard
-      </button>
+        <button class="btn w-100 action-btn mt-3" (click)="shareLetter()" style="background:#25D366; color:#fff; border:none;">
+          <i class="fa-brands fa-whatsapp me-2"></i> Share via WhatsApp
+        </button>
+
+        <button class="btn btn-outline-dark w-100 action-btn mt-4" (click)="goHome()">
+          Go to Dashboard
+        </button>
+      </div>
     }
-
   </div>
 </div>

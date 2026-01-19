@@ -23,15 +23,14 @@ export class LockLetterComponent implements OnInit, OnDestroy {
   message = '';
 
   showCode = false;
-  countdown = 5;
   isSaving = false;
 
   previewText = '';
-  private timer: any;
 
   // 📋 LOCKED LETTERS TABLE
   letters: any[] = [];
   now = Date.now();
+  private timer: any;
 
   constructor(
     private letterService: LetterService,
@@ -48,7 +47,7 @@ export class LockLetterComponent implements OnInit, OnDestroy {
 
     this.letters = await this.letterService.getMyLetters(user.uid);
 
-    // update time for countdown display
+    // only for locked letters countdown
     this.timer = setInterval(() => {
       this.now = Date.now();
     }, 1000);
@@ -91,14 +90,16 @@ export class LockLetterComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // keep preview
+    // preview
     this.previewText = this.text.trim();
 
+    // generate magic code
     this.code = Math.random()
       .toString(36)
       .substring(2, 8)
       .toUpperCase();
 
+    // save letter
     await this.letterService.saveLetter({
       userId,
       receiverName: this.receiverName.trim(),
@@ -108,8 +109,8 @@ export class LockLetterComponent implements OnInit, OnDestroy {
       createdAt: Date.now()
     });
 
+    // show code (no auto hide)
     this.showCode = true;
-    this.startCountdown();
 
     // clear inputs
     this.text = '';
@@ -118,8 +119,40 @@ export class LockLetterComponent implements OnInit, OnDestroy {
     this.time = '';
     this.isSaving = false;
 
-    // 🔄 reload letters so table updates
+    // reload table
     this.letters = await this.letterService.getMyLetters(userId);
+  }
+
+  /* =====================
+     WHATSAPP SHARE ONLY
+  ====================== */
+  shareLetter() {
+  // Create a more readable date format for the message
+  const unlockDateTime = new Date(`${this.date}T${this.time}`).toLocaleString([], {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  });
+
+    const message = `✨ *You've received a Locked Letter!* ✨
+
+  Hi there! 👋 Someone sent you a digital time capsule. It’s sealed with magic and can only be opened at the perfect moment.
+
+  ⏳ *UNLOCKS ON:*
+  ${unlockDateTime}
+
+  🔑 *YOUR MAGIC CODE:*
+  *${this.code}*
+
+  ---------------------------
+  🚀 *HOW TO OPEN IT:*
+  1. Download **Lock Letter**
+  👉 https://magicletter.app
+  2. Sign in and enter your code.
+
+  Keep this code safe! The message remains a secret until the timer hits zero. 🔐`;
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   }
 
   /* =====================
@@ -145,21 +178,8 @@ export class LockLetterComponent implements OnInit, OnDestroy {
   }
 
   /* =====================
-     UI HELPERS
+     NAVIGATION
   ====================== */
-  startCountdown() {
-    if (this.timer) clearInterval(this.timer);
-
-    this.countdown = 5;
-    this.timer = setInterval(() => {
-      this.countdown--;
-      if (this.countdown === 0) {
-        this.showCode = false;
-        clearInterval(this.timer);
-      }
-    }, 1000);
-  }
-
   goHome() {
     this.router.navigate(['/home']);
   }
@@ -167,4 +187,16 @@ export class LockLetterComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     clearInterval(this.timer);
   }
+
+
+  copyCode(code: string) {
+  navigator.clipboard.writeText(code).then(() => {
+    // Optional: Show a brief success message
+    const originalMessage = this.message;
+    this.message = 'Code copied to clipboard!';
+    setTimeout(() => this.message = originalMessage, 2000);
+  }).catch(err => {
+    console.error('Could not copy text: ', err);
+  });
+}
 }
