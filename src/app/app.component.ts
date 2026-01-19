@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { Location } from '@angular/common';
+import { Router, RouterOutlet } from '@angular/router';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 
@@ -13,30 +12,22 @@ import { Capacitor } from '@capacitor/core';
 })
 export class AppComponent {
 
-  private lastBackPress = 0;
-  private exitDelay = 2000; // 2 seconds
+  constructor(private router: Router) {
 
-  constructor(private location: Location) {
-
+    // Run only on mobile
     if (!Capacitor.isNativePlatform()) return;
 
     App.addListener('backButton', () => {
-      const now = Date.now();
-      const path = window.location.pathname;
+      const currentUrl = this.router.url;
 
-      // ✅ NOT home → go back
-      if (path !== '/home') {
-        this.location.back();
+      // 📄 Not Home → Go Home
+      if (currentUrl !== '/home') {
+        this.router.navigate(['/home']);
         return;
       }
 
-      // ✅ HOME → double back to exit
-      if (now - this.lastBackPress < this.exitDelay) {
-        App.exitApp();
-      } else {
-        this.lastBackPress = now;
-        alert('Press back again to exit');
-      }
+      // 🏠 Home → EXIT APP (NO MESSAGE)
+      App.exitApp();
     });
   }
 }
