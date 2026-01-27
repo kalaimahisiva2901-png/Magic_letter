@@ -191,6 +191,20 @@ html, body {
   text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
 }
 
+/* 📊 TABLE POLISH */
+.lock-table {
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.lock-table td {
+  padding: 16px 12px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+
 /* 🪄 ANIMATIONS */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(20px) scale(0.95); }
@@ -216,4 +230,178 @@ html, body {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
+}
+
+
+
+/* --- CONTAINER FOR THE CARDS --- */
+.letter-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 30px;
+}
+
+/* --- THE CARD --- */
+.letter-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  transition: transform 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.letter-card:hover {
+  transform: translateY(-2px);
+  border-color: #e2e8f0;
+}
+
+/* --- LEFT SIDE: ICON & NAMES --- */
+.letter-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.status-indicator {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+}
+
+/* Status Colors */
+.status-indicator.locked { 
+  background: #fff1f2; 
+  color: #e11d48; 
+}
+
+.status-indicator.unlocked { 
+  background: #ecfdf5; 
+  color: #10b981; 
+}
+
+.status-indicator.opened { 
+  background: #f1f5f9; 
+  color: #64748b; 
+}
+
+/* Text inside info */
+.details {
+  display: flex;
+  flex-direction: column;
+}
+
+.recipient {
+  display: block;
+  font-weight: 700;
+  color: #000;
+  font-size: 0.95rem;
+}
+
+.status-text {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- RIGHT SIDE: TIME & ARROW --- */
+.letter-meta {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.time-left {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #888;
+}
+
+.arrow-icon {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+/* Dim the card if it's already opened */
+.opened-row {
+  opacity: 0.8;
+}
+
+/* --- EMPTY STATE --- */
+.empty-state-v2 {
+  text-align: center;
+  padding: 60px 20px;
+  color: #cbd5e1;
+}
+
+.empty-icon-wrap {
+  width: 80px; 
+  height: 80px;
+  background: white;
+  border-radius: 30px;
+  display: grid; 
+  place-items: center;
+  margin: 0 auto 20px;
+  font-size: 2rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+}
+
+
+/* Connects the card to the panel */
+.active-card {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  box-shadow: none !important;
+  border-bottom: 1px dashed #eee !important;
+}
+
+.expand-panel {
+  background: #ffffff;
+  border-radius: 0 0 20px 20px;
+  padding: 12px 16px 20px;
+  margin-top: -1px;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.03);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rgba(0,0,0,0.02);
+  border-top: none;
+  animation: slideDown 0.2s ease-out;
+}
+
+.code-display {
+  font-family: 'Monaco', monospace;
+  font-size: 1.1rem;
+  font-weight: 850;
+  color: #6366f1; /* Your primary color */
+  letter-spacing: 1px;
+}
+
+.btn-whatsapp {
+  background: #25d366;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

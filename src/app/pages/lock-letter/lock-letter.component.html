@@ -105,4 +105,65 @@
       </div>
     }
   </div>
+
+
+  <!-- 🔐 TABLE -->
+  <div class="letter-list-container mt-4">
+  @for (letter of lettersTable; track letter.code) {
+    <div class="letter-card-wrapper">
+      <div class="letter-card" 
+           [class.opened-row]="letter.status === 'opened'"
+           [class.active-card]="expandedLetterCode === letter.code"
+           (click)="toggleExpand(letter.code)">
+        
+        <div class="letter-info">
+          <div class="status-indicator" 
+               [class.locked]="letter.status === 'locked'"
+               [class.unlocked]="letter.status === 'unlocked'"
+               [class.opened]="letter.status === 'opened'">
+            
+            @if (letter.status === 'locked') {
+              <i class="fa-solid fa-lock"></i>
+            } @else if (letter.status === 'unlocked') {
+              <i class="fa-solid fa-lock-open"></i>
+            } @else {
+              <i class="fa-solid fa-envelope-open"></i>
+            }
+          </div>
+
+          <div class="details">
+            <span class="recipient">
+              {{ letter.receiverName }}
+            </span>
+            <span class="status-text">
+              @if (letter.status === 'locked') { Sealed }
+              @else if (letter.status === 'unlocked') { Ready }
+              @else { Opened }
+            </span>
+          </div>
+        </div>
+
+        <div class="letter-meta">
+          <span class="time-left">
+            <i class="fa-regular fa-clock"></i> {{ getTime(letter.unlockAt) }}
+          </span>
+          <i class="fa-solid fa-chevron-down arrow-icon" 
+             [style.transform]="expandedLetterCode === letter.code ? 'rotate(180deg)' : ''"></i>
+        </div>
+      </div>
+
+      @if (expandedLetterCode === letter.code) {
+        <div class="expand-panel">
+          <div class="magic-box" (click)="copyCode(letter.code)">
+            <small>Magic Code (Tap to copy)</small>
+            <div class="code-display">{{ letter.code }}</div>
+          </div>
+          
+          <button class="btn-whatsapp" (click)="shareTableLetter(letter); $event.stopPropagation()">
+            <i class="fa-brands fa-whatsapp"></i> Share
+          </button>
+        </div>
+      }
+    </div>
+  }
 </div>

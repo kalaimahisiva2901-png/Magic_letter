@@ -102,4 +102,28 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.router.navigateByUrl('/auth', { replaceUrl: true });
     });
   }
+
+  // 1. Add this property at the top of your class
+expandedLetterCode: string | null = null;
+
+// 2. Add these methods
+toggleExpand(code: string) {
+  this.expandedLetterCode = this.expandedLetterCode === code ? null : code;
+}
+
+copyCode(code: string) {
+  navigator.clipboard.writeText(code);
+  // Optional: add a toast or alert here
+}
+
+shareTableLetter(l: any) {
+  const unlockDate = new Date(l.unlockAt).toLocaleString([], {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  });
+
+  const message = `✨ *You've received a Locked Letter!* ✨%0A%0AHi *${l.receiverName || 'there'}*! 👋 You have a digital time capsule waiting.%0A%0A⏳ *UNLOCKS ON:*%0A${unlockDate}%0A%0A🔑 *YOUR MAGIC CODE:*%0A\`${l.secretCode}\`%0A%0A---------------------------%0A🚀 *OPEN IT HERE:*%0Ahttps://magicletter.app`;
+
+  window.open(`https://wa.me/?text=${message}`, '_blank');
+}
 }
