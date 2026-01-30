@@ -1,12 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LetterService } from '../../services/letter.service';
-import { CommonModule } from '@angular/common';
-import { SessionDataService } from '../../services/session-data.service';
 import { Auth } from '@angular/fire/auth';
 
-/* ---------- TYPES ---------- */
+import {
+  LetterService,
+  LetterAttempt
+} from '../../services/letter.service';
+
 type LetterStatus = 'locked' | 'unlocked' | 'opened';
 
 interface LetterRow {
@@ -14,12 +16,13 @@ interface LetterRow {
   unlockAt: number;
   letterText: string;
   status: LetterStatus;
+  attemptId?: string;
 }
 
 @Component({
   selector: 'app-open-letter',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './open-letter.component.html',
   styleUrl: './open-letter.component.css'
 })
@@ -28,111 +31,113 @@ export class OpenLetterComponent implements OnInit, OnDestroy {
   secretCode = '';
   letterText = '';
   message = '';
-
   status: LetterStatus | null = null;
 
   remainingText = '';
   progress = 0;
-
   isFinalSeconds = false;
   finalSeconds = 0;
 
   lettersTable: LetterRow[] = [];
-
   private timer: any;
   private currentCode = '';
 
-  // 🔐 session keys
-  private readonly TABLE_KEY = 'open_letters_table';
-
   constructor(
     private letterService: LetterService,
-    private sessionData: SessionDataService,
     private auth: Auth,
     private router: Router
   ) {}
 
-  /* ---------- FIREBASE USER ID ---------- */
   get userId(): string {
     return this.auth.currentUser?.uid ?? '';
   }
 
-  /* ---------- LOAD SESSION DATA ---------- */
-  ngOnInit() {
+  /* ---------- INIT ---------- */
+  async ngOnInit() {
     if (!this.userId) {
       this.router.navigate(['/login']);
       return;
     }
 
-    const table = this.sessionData.get<LetterRow[]>(
-      this.TABLE_KEY,
-      this.userId
-    );
+    const attempts: LetterAttempt[] =
+      await this.letterService.getMyAttempts(this.userId);
 
-    if (table) {
-      this.lettersTable = table;
-      this.sortTable();
+    for (const attempt of attempts) {
+      const data: any =
+        await this.letterService.getLetterByCode(attempt.letterCode);
+
+      if (!data) continue;
+
+      const now = Date.now();
+      const status: LetterStatus =
+        now < attempt.unlockAt ? 'locked' : 'unlocked';
+
+      this.lettersTable.push({
+        code: attempt.letterCode,
+        unlockAt: attempt.unlockAt,
+        letterText: data.letterText,
+        status,
+        attemptId: attempt.id
+      });
     }
 
-    // ❌ DO NOT restore secretCode (important)
-    this.secretCode = '';
+    this.sortTable();
   }
 
   /* ---------- ENTER CODE ---------- */
   async open() {
     clearInterval(this.timer);
-
-    this.status = null;
     this.message = '';
-    this.remainingText = '';
-    this.progress = 0;
-    this.isFinalSeconds = false;
-    this.finalSeconds = 0;
+    this.status = null;
 
     if (!this.secretCode) {
       this.message = 'Please enter secret code';
       return;
     }
 
-    const data = await this.letterService.getLetterByCode(this.secretCode);
+    if (await this.letterService.isLetterOpened(this.secretCode)) {
+      this.message = 'This letter has already been opened';
+      return;
+    }
+
+    const data: any =
+      await this.letterService.getLetterByCode(this.secretCode);
 
     if (!data) {
       this.message = 'Invalid secret code';
       return;
     }
 
-    this.currentCode = this.secretCode;
-
+    const unlockAt = Number(data.unlockAt);
     const now = Date.now();
-    const unlockAt = Number(data['unlockAt']);
 
-    let row = this.lettersTable.find(
-      l => l.code === this.currentCode
+    const attempt = await this.letterService.saveAttempt(
+      this.secretCode,
+      this.userId,
+      unlockAt
     );
 
-    if (!row) {
-      row = {
-        code: this.currentCode,
-        unlockAt,
-        letterText: data['letterText'],
-        status: now < unlockAt ? 'locked' : 'unlocked'
-      };
-      this.lettersTable.push(row);
-    }
+    this.currentCode = this.secretCode;
+
+    this.lettersTable.push({
+      code: this.secretCode,
+      unlockAt,
+      letterText: data.letterText,
+      status: now < unlockAt ? 'locked' : 'unlocked',
+      attemptId: attempt.id
+    });
 
     this.sortTable();
-    this.saveTable();
 
     if (now < unlockAt) {
       this.status = 'locked';
       this.startTimer(unlockAt);
-      return;
+    } else {
+      this.status = 'unlocked';
     }
-
-    this.status = 'unlocked';
   }
 
-  /* ---------- COUNTDOWN ---------- */
+  /* ---------- TIMER ---------- */
   startTimer(unlockAt: number) {
     const total = unlockAt - Date.now();
 
@@ -141,16 +146,7 @@ export class OpenLetterComponent implements OnInit, OnDestroy {
 
       if (diff <= 0) {
         clearInterval(this.timer);
-
         this.status = 'unlocked';
-
-        const row = this.lettersTable.find(
-          l => l.code === this.currentCode
-        );
-        if (row) row.status = 'unlocked';
-
-        this.sortTable();
-        this.saveTable();
         return;
       }
 
@@ -160,58 +156,40 @@ export class OpenLetterComponent implements OnInit, OnDestroy {
         this.isFinalSeconds = true;
         this.finalSeconds = seconds;
       } else {
-        this.isFinalSeconds = false;
         this.remainingText = this.format(diff);
         this.progress = 100 - Math.floor((diff / total) * 100);
       }
     }, 1000);
   }
 
-  /* ---------- USER OPENS LETTER ---------- */
-  openLetter() {
-    this.status = 'opened';
-
-    const row = this.lettersTable.find(
-      l => l.code === this.currentCode
+  /* ---------- OPEN LETTER ---------- */
+  async openLetter() {
+    await this.letterService.openLetterOnce(
+      this.currentCode,
+      this.userId
     );
 
-    if (row) {
-      row.status = 'opened';
-      this.letterText = row.letterText;
+    const row = this.lettersTable.find(
+      r => r.code === this.currentCode
+    );
+    if (!row) return;
+
+    row.status = 'opened';
+    this.status = 'opened';
+    this.letterText = row.letterText;
+
+    if (row.attemptId) {
+      await this.letterService.deleteAttempt(row.attemptId);
     }
 
     this.sortTable();
-    this.saveTable();
-
-    // ✅ RESET FORM STATE
-    this.secretCode = '';
-    this.currentCode = '';
-    this.message = '';
   }
 
-  /* ---------- SESSION STORAGE ---------- */
-  saveTable() {
-    this.sessionData.set(
-      this.TABLE_KEY,
-      this.userId,
-      this.lettersTable
-    );
-  }
-
-  /* ---------- SORT ---------- */
   sortTable() {
-    const order: Record<LetterStatus, number> = {
-      locked: 0,
-      unlocked: 1,
-      opened: 2
-    };
-
-    this.lettersTable.sort((a, b) => {
-      if (order[a.status] !== order[b.status]) {
-        return order[a.status] - order[b.status];
-      }
-      return a.unlockAt - b.unlockAt;
-    });
+    const order = { locked: 0, unlocked: 1, opened: 2 };
+    this.lettersTable.sort(
+      (a, b) => order[a.status] - order[b.status]
+    );
   }
 
   format(ms: number): string {

@@ -112,3 +112,12 @@ html, body, app-root {
 }
 
 @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+
+/* 🔒 ANGULAR FIX: ensure fixed elements bind to viewport */
+body,
+app-root {
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+}

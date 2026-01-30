@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LetterService } from '../../services/letter.service';
-import { AuthService } from '../../services/auth.service';
+import { Auth } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-lock-letter',
@@ -26,7 +26,7 @@ export class LockLetterComponent implements OnInit, OnDestroy {
   isSaving = false;
   previewText = '';
 
-  // Properties to preserve data for WhatsApp after form reset
+  // Preserve data for WhatsApp after reset
   lastLockedDate = '';
   lastReceiver = '';
 
@@ -36,14 +36,20 @@ export class LockLetterComponent implements OnInit, OnDestroy {
   now = Date.now();
   private timer: any;
 
+  // 🔽 Expansion state
+  expandedLetterCode: string | null = null;
+
   constructor(
     private letterService: LetterService,
-    private auth: AuthService,
+    private firebaseAuth: Auth, // ✅ FIREBASE AUTH
     private router: Router
   ) {}
 
+  /* =====================
+      INIT
+  ====================== */
   async ngOnInit() {
-    const user = this.auth.getUser();
+    const user = this.firebaseAuth.currentUser;
     if (!user) return;
 
     this.letters = await this.letterService.getMyLetters(user.uid);
@@ -67,7 +73,7 @@ export class LockLetterComponent implements OnInit, OnDestroy {
       return {
         code: letter.secretCode,
         unlockAt: letter.unlockAt,
-        receiverName: letter.receiverName, // ✅ FIXED: Added this to show in table
+        receiverName: letter.receiverName,
         status
       };
     });
@@ -79,8 +85,15 @@ export class LockLetterComponent implements OnInit, OnDestroy {
   async lock() {
     this.message = '';
 
-    if (!this.receiverName.trim()) { this.message = 'Please enter receiver name'; return; }
-    if (!this.text.trim()) { this.message = 'Please write your letter'; return; }
+    if (!this.receiverName.trim()) {
+      this.message = 'Please enter receiver name';
+      return;
+    }
+
+    if (!this.text.trim()) {
+      this.message = 'Please write your letter';
+      return;
+    }
 
     const unlockAt = new Date(`${this.date}T${this.time}`).getTime();
     if (unlockAt <= Date.now()) {
@@ -91,14 +104,16 @@ export class LockLetterComponent implements OnInit, OnDestroy {
     if (this.isSaving) return;
     this.isSaving = true;
 
-    const userId = this.auth.getUserId();
-    if (!userId) {
+    const user = this.firebaseAuth.currentUser;
+    if (!user) {
       this.message = 'User not logged in';
       this.isSaving = false;
       return;
     }
 
-    // ✅ CAPTURE DATA for WhatsApp before clearing inputs
+    const userId = user.uid;
+
+    // Capture data for WhatsApp before clearing inputs
     this.lastReceiver = this.receiverName.trim();
     this.lastLockedDate = new Date(`${this.date}T${this.time}`).toLocaleString([], {
       dateStyle: 'medium',
@@ -106,33 +121,43 @@ export class LockLetterComponent implements OnInit, OnDestroy {
     });
     this.previewText = this.text.trim();
 
-    this.code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    this.code = Math.random()
+      .toString(36)
+      .substring(2, 8)
+      .toUpperCase();
 
-    await this.letterService.saveLetter({
-      userId,
-      receiverName: this.lastReceiver,
-      letterText: this.previewText,
-      unlockAt,
-      secretCode: this.code,
-      createdAt: Date.now()
-    });
+    try {
+      await this.letterService.saveLetter({
+        userId, // 🔥 REQUIRED BY FIRESTORE RULES
+        receiverName: this.lastReceiver,
+        letterText: this.previewText,
+        unlockAt,
+        secretCode: this.code,
+        createdAt: Date.now()
+      });
 
-    this.showCode = true;
-    
-    // Clear inputs
-    this.text = '';
-    this.receiverName = '';
-    this.isSaving = false;
+      this.showCode = true;
 
-    this.letters = await this.letterService.getMyLetters(userId);
-    this.buildLettersTable();
+      // Clear inputs
+      this.text = '';
+      this.receiverName = '';
+
+      // Refresh table
+      this.letters = await this.letterService.getMyLetters(userId);
+      this.buildLettersTable();
+
+    } catch (err) {
+      console.error(err);
+      this.message = 'Failed to seal letter. Please try again.';
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   /* =====================
       WHATSAPP SHARE
   ====================== */
   shareLetter() {
-    // ✅ FIXED: Uses captured data so it's never "Invalid Date"
     const message = `✨ *You've received a Locked Letter!* ✨
 
 Hi *${this.lastReceiver}*! 👋 Someone sent you a digital time capsule. It’s sealed with magic and can only be opened at the perfect moment.
@@ -151,48 +176,35 @@ ${this.lastLockedDate}
 
 Keep this code safe! 🔐`;
 
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(message)}`,
+      '_blank'
+    );
   }
 
+  /* =====================
+      TABLE HELPERS
+  ====================== */
   getTime(unlockAt: number) {
     const diff = unlockAt - this.now;
     if (diff <= 0) return 'Unlocked';
+
     const s = Math.floor((diff / 1000) % 60);
     const m = Math.floor((diff / 60000) % 60);
     const h = Math.floor((diff / 3600000) % 24);
     const d = Math.floor(diff / 86400000);
+
     if (d) return `${d}d ${h}h`;
     if (h) return `${h}h ${m}m`;
     if (m) return `${m}m ${s}s`;
     return `${s}s`;
   }
 
-  goHome() { this.router.navigate(['/home']); }
-
-  ngOnDestroy() { if (this.timer) clearInterval(this.timer); }
-
-  copyCode(code: string) {
-    navigator.clipboard.writeText(code).then(() => {
-      const original = this.message;
-      this.message = '✅ Code copied to clipboard!';
-      setTimeout(() => this.message = original, 2000);
-    });
-  }
-
-  // 🔽 ADD THIS PROPERTY FOR EXPANSION
-  expandedLetterCode: string | null = null;
-
-  // ... existing constructor & ngOnInit ...
-
-  /* =====================
-      EXPANSION LOGIC
-  ====================== */
-  // Toggle the expanded state of a card in the table
   toggleExpand(code: string) {
-    this.expandedLetterCode = this.expandedLetterCode === code ? null : code;
+    this.expandedLetterCode =
+      this.expandedLetterCode === code ? null : code;
   }
 
-  // Share logic specifically for letters already in the table
   shareTableLetter(letter: any) {
     const unlockDate = new Date(letter.unlockAt).toLocaleString([], {
       dateStyle: 'medium',
@@ -217,6 +229,25 @@ ${unlockDate}
 
 Keep this code safe! 🔐`;
 
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(message)}`,
+      '_blank'
+    );
+  }
+
+  copyCode(code: string) {
+    navigator.clipboard.writeText(code).then(() => {
+      const original = this.message;
+      this.message = '✅ Code copied to clipboard!';
+      setTimeout(() => (this.message = original), 2000);
+    });
+  }
+
+  goHome() {
+    this.router.navigate(['/home']);
+  }
+
+  ngOnDestroy() {
+    if (this.timer) clearInterval(this.timer);
   }
 }
