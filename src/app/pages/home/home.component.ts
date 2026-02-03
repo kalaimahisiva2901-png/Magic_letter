@@ -21,6 +21,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   userName = 'User';
   userEmail = '';
 
+  // ✅ SHOW MORE CONFIG (UI ONLY)
+  visibleCount = 5;
+
+  expandedLetterCode: string | null = null;
+
   constructor(
     private letterService: LetterService,
     private auth: AuthService,
@@ -41,15 +46,15 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     const data = await this.letterService.getMyLetters(user.uid);
 
-    // ✅ LOCKED FIRST → UNLOCKED LAST
+    // ✅ LOCKED FIRST → UNLOCKED LAST (UNCHANGED)
     this.letters = data.sort((a: any, b: any) => {
       const aLocked = a.unlockAt > Date.now();
       const bLocked = b.unlockAt > Date.now();
 
-      if (aLocked && !bLocked) return -1; // a up
-      if (!aLocked && bLocked) return 1;  // b up
+      if (aLocked && !bLocked) return -1;
+      if (!aLocked && bLocked) return 1;
 
-      return a.unlockAt - b.unlockAt; // time order
+      return a.unlockAt - b.unlockAt;
     });
 
     this.timer = setInterval(() => {
@@ -60,6 +65,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     clearInterval(this.timer);
   }
+
+  // ================= EXISTING LOGIC =================
 
   isLocked(letter: any) {
     return this.now < letter.unlockAt;
@@ -103,27 +110,33 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  // 1. Add this property at the top of your class
-expandedLetterCode: string | null = null;
+  toggleExpand(code: string) {
+    this.expandedLetterCode = this.expandedLetterCode === code ? null : code;
+  }
 
-// 2. Add these methods
-toggleExpand(code: string) {
-  this.expandedLetterCode = this.expandedLetterCode === code ? null : code;
+  copyCode(code: string) {
+    navigator.clipboard.writeText(code);
+  }
+
+  shareTableLetter(l: any) {
+    const unlockDate = new Date(l.unlockAt).toLocaleString([], {
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+
+    const message =
+      `✨ *You've received a Locked Letter!* ✨%0A%0A` +
+      `Hi *${l.receiverName || 'there'}*! 👋 You have a digital time capsule waiting.%0A%0A` +
+      `⏳ *UNLOCKS ON:*%0A${unlockDate}%0A%0A` +
+      `🔑 *YOUR MAGIC CODE:*%0A\`${l.secretCode}\`%0A%0A` +
+      `---------------------------%0A🚀 *OPEN IT HERE:*%0Ahttps://magicletter.app`;
+
+    window.open(`https://wa.me/?text=${message}`, '_blank');
+  }
+
+  // ✅ SHOW MORE HANDLER
+  showMore() {
+  this.visibleCount = this.letters.length;
 }
 
-copyCode(code: string) {
-  navigator.clipboard.writeText(code);
-  // Optional: add a toast or alert here
-}
-
-shareTableLetter(l: any) {
-  const unlockDate = new Date(l.unlockAt).toLocaleString([], {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  });
-
-  const message = `✨ *You've received a Locked Letter!* ✨%0A%0AHi *${l.receiverName || 'there'}*! 👋 You have a digital time capsule waiting.%0A%0A⏳ *UNLOCKS ON:*%0A${unlockDate}%0A%0A🔑 *YOUR MAGIC CODE:*%0A\`${l.secretCode}\`%0A%0A---------------------------%0A🚀 *OPEN IT HERE:*%0Ahttps://magicletter.app`;
-
-  window.open(`https://wa.me/?text=${message}`, '_blank');
-}
 }

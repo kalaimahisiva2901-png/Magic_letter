@@ -462,3 +462,26 @@ html, body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+
+
+/* Show More Align */
+
+/* 🔽 SHOW MORE BUTTON CENTER */
+
+
+/* ✅ FORCE CENTER SHOW MORE BUTTON */
+.show-more-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0 10px;
+}
+
+.show-more-btn {
+  display: inline-flex;
+  padding: 10px 22px;
+  border-radius: 16px;
+  min-width: 140px;
+}
+

@@ -39,6 +39,15 @@ export class LockLetterComponent implements OnInit, OnDestroy {
   // 🔽 Expansion state
   expandedLetterCode: string | null = null;
 
+
+  // 🔽 SHOW MORE (UI ONLY)
+  visibleCount = 5;
+  
+  showMore() {
+  this.visibleCount = this.lettersTable.length;
+}
+
+
   constructor(
     private letterService: LetterService,
     private firebaseAuth: Auth, // ✅ FIREBASE AUTH

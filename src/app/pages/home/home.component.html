@@ -1,7 +1,7 @@
 <nav class="home-navbar">
   <div class="nav-brand">
     <div class="logo-icon minimalist">
-      <i class="fa-solid fa-wand-magic-sparkles"></i> 
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
     </div>
     <span class="brand-text">Magic Letter</span>
   </div>
@@ -13,7 +13,7 @@
 
 <div class="page-content-wrapper">
   <div class="container-page home-screen">
-    
+
     <header class="welcome-section">
       <h1>Hello, {{ userName.split(' ')[0] }}!</h1>
       <p>What magic shall we lock away today?</p>
@@ -42,81 +42,88 @@
       </div>
 
       @if (letters.length > 0) {
-  <div class="letter-list-container">
-    @for (l of letters; track l.secretCode) {
-      <div class="letter-card-wrapper">
-        <div class="letter-card" 
-             [class.active-card]="expandedLetterCode === l.secretCode"
-             (click)="toggleExpand(l.secretCode)">
-          
-          <div class="letter-info">
-            <div class="status-indicator" [class.locked]="isLocked(l)">
-              <i [class]="isLocked(l) ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'"></i>
+      <div class="letter-list-container">
+        @for (l of letters.slice(0, visibleCount); track l.secretCode) {
+        <div class="letter-card-wrapper">
+
+          <div class="letter-card" [class.active-card]="expandedLetterCode === l.secretCode"
+            (click)="toggleExpand(l.secretCode)">
+
+            <div class="letter-info">
+              <div class="status-indicator" [class.locked]="isLocked(l)">
+                <i [class]="isLocked(l) ? 'fa-solid fa-lock' : 'fa-solid fa-lock-open'"></i>
+              </div>
+              <div class="details">
+                <span class="recipient">To: {{ l.receiverName || 'Future Me' }}</span>
+                <span class="status-text">{{ isLocked(l) ? 'Sealed' : 'Unlocked' }}</span>
+              </div>
             </div>
-            <div class="details">
-              <span class="recipient">To: {{ l.receiverName || 'Future Me' }}</span>
-              <span class="status-text">{{ isLocked(l) ? 'Sealed' : 'Unlocked' }}</span>
+
+            <div class="letter-meta">
+              <span class="time-left">
+                <i class="fa-regular fa-clock"></i> {{ getTime(l.unlockAt) }}
+              </span>
+              <i class="fa-solid fa-chevron-down arrow-icon"
+                [style.transform]="expandedLetterCode === l.secretCode ? 'rotate(180deg)' : ''">
+              </i>
             </div>
           </div>
 
-          <div class="letter-meta">
-            <span class="time-left">
-              <i class="fa-regular fa-clock"></i> {{ getTime(l.unlockAt) }}
-            </span>
-            <i class="fa-solid fa-chevron-down arrow-icon"
-               [style.transform]="expandedLetterCode === l.secretCode ? 'rotate(180deg)' : ''"></i>
-          </div>
-        </div>
-
-        @if (expandedLetterCode === l.secretCode) {
+          @if (expandedLetterCode === l.secretCode) {
           <div class="expand-panel">
             <div class="magic-box" (click)="copyCode(l.secretCode); $event.stopPropagation()">
               <small>Magic Code (Tap to copy)</small>
               <div class="code-display">{{ l.secretCode }}</div>
             </div>
-            
+
             <button class="btn-whatsapp" (click)="shareTableLetter(l); $event.stopPropagation()">
               <i class="fa-brands fa-whatsapp"></i> Share
             </button>
           </div>
+          }
+        </div>
         }
       </div>
-    }
-  </div>
-} @else {
-  }
+
+      @if (letters.length > visibleCount) {
+      <div class="show-more-row">
+        <button class="glass-btn secondary show-more-btn" (click)="showMore()">
+          Show more
+        </button>
+      </div>
+      }
+
+      }
     </div>
   </div>
 </div>
 
 @if (showSettings) {
-  <div class="drawer-backdrop" (click)="closeSettings()"></div>
+<div class="drawer-backdrop" (click)="closeSettings()"></div>
 
-  <div class="drawer-right" (click)="$event.stopPropagation()">
-    <div class="drawer-header">
-      <img
-        class="avatar-large"
-        src="https://ui-avatars.com/api/?name={{userName}}&background=000&color=fff" />
-      <div class="user-name-text mt-3">{{ userName }}</div>
-      <small class="text-muted">{{ userEmail }}</small>
+<div class="drawer-right" (click)="$event.stopPropagation()">
+  <div class="drawer-header">
+    <img class="avatar-large" src="https://ui-avatars.com/api/?name={{userName}}&background=000&color=fff" />
+    <div class="user-name-text mt-3">{{ userName }}</div>
+    <small class="text-muted">{{ userEmail }}</small>
+  </div>
+
+  <div class="drawer-body">
+    <div class="menu-item">
+      <i class="fa-solid fa-circle-user"></i>
+      <span>Edit Profile</span>
     </div>
-
-    <div class="drawer-body">
-      <div class="menu-item">
-        <i class="fa-solid fa-circle-user"></i>
-        <span>Edit Profile</span>
-      </div>
-      <div class="menu-item">
-        <i class="fa-solid fa-bell"></i>
-        <span>Notifications</span>
-      </div>
-    </div>
-
-    <div class="drawer-footer">
-      <button class="btn-logout" (click)="logout()">
-        <i class="fa-solid fa-right-from-bracket me-2"></i>
-        Logout
-      </button>
+    <div class="menu-item">
+      <i class="fa-solid fa-bell"></i>
+      <span>Notifications</span>
     </div>
   </div>
+
+  <div class="drawer-footer">
+    <button class="btn-logout" (click)="logout()">
+      <i class="fa-solid fa-right-from-bracket me-2"></i>
+      Logout
+    </button>
+  </div>
+</div>
 }

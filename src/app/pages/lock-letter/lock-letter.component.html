@@ -109,7 +109,7 @@
 
   <!-- 🔐 TABLE -->
   <div class="letter-list-container mt-4">
-  @for (letter of lettersTable; track letter.code) {
+  @for (letter of lettersTable.slice(0, visibleCount); track letter.code) {
     <div class="letter-card-wrapper">
       <div class="letter-card" 
            [class.opened-row]="letter.status === 'opened'"
@@ -166,4 +166,13 @@
       }
     </div>
   }
+  @if (lettersTable.length > visibleCount) {
+  <div class="show-more-row">
+    <button
+      class="glass-btn secondary show-more-btn"
+      (click)="showMore()">
+      Show more
+    </button>
+  </div>
+}
 </div>
